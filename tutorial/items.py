@@ -12,4 +12,4 @@ class TutorialItem(scrapy.Item):
     image = scrapy.Field()
     href = scrapy.Field()
     name = scrapy.Field()
-    cost = scrapy.Field()
+    # cost = scrapy.Field()

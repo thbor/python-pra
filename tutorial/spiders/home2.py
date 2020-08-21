@@ -18,7 +18,7 @@ class Home2(scrapy.Spider):
         item['image'] = ul.xpath('div[@class="p_img"]/a/img/@src').get(),
         item['href'] = ul.xpath('div[@class="p_productCN"]/a/@href').get(),
         item['name'] = ul.xpath('div[@class="p_productCN"]/a/text()').get(),
-        item['cost'] = ul.xpath('div[@class="p_discount commonFontPrice"]/text()').get()
+        # item['cost'] = ul.xpath('div[@class="p_discount commonFontPrice"]/text()').get()
         items.append(item)
         yield item
             # yield {
