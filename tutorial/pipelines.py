@@ -19,8 +19,11 @@ import string
 import smtplib
 import time
 import os
+import pymongo
+from pymongo import MongoClient
 from email.mime.text import MIMEText
 from email.header import Header
+
 # import MySQLdb
 # import MySQLdb.cursors
 
@@ -35,47 +38,86 @@ class TutorialPipeline:
     #     self.file.close()
 
 
-    def __init__(self):
-        self.db = None
-        self.cursor = None   
-    def process_item(self, item, spider):
-        #数据库的名字和密码自己知道！！！bole是数据库的名字
-        self.db = pymysql.connect(host='localhost', user='root', passwd='123456', db='info')
-        self.cursor = self.db.cursor()
-        #由于可能报错所以在这重复拿了一下item中的数据，存在了data的字典中
-        data = {
-            "timer":item['timer'],
-            "value":item['value'],
-            "bitValue":item['bitValue'],
-            "allValue":item['allValue'],
-            "tradeValue":item['tradeValue'],
-        }
-        # imageHref = "http:"+"".join(tuple(data['image']))
-        
-        # print("=================")
-        # print(imageHref)
-        # print("=================")
-        # os.makedirs('./image/', exist_ok=True)
-        # IMAGE_URL = imageHref
-        # r = requests.get(IMAGE_URL)
-        # ran_str = ''.join(random.sample(string.ascii_letters + string.digits, 18))
-        # print(ran_str)
-        # imageName = './image/'+ran_str+'.jpg'
-        # with open(imageName, 'wb') as f:
-        #   f.write(r.content)    
-
-        #注意：MySQL数据库命令语句
-        # insert_sql = "INSERT INTO fxh (name, chName, href,value,globalIndex,value24h,number,change,increase) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-        print("00000000000000000")
-        print(type(data["timer"]))
-        insert_sql = "INSERT INTO eos1 ( timer,value, bitValue,allValue,tradeValue) VALUES (%s,%s,%s,%s,%s)"
-        try:
-            self.cursor.execute(insert_sql, ( data['timer'],data['value'], data['bitValue'], data['allValue'],data['tradeValue']))
-            self.db.commit()
-        except Exception as e:
-            print('问题数据跳过！.......',e)
-            self.db.rollback()
+    # def __init__(self):
+    #     self.db = None
+    #     self.cursor = None   
+    # def process_item(self, item, spider):
+    #     #数据库的名字和密码自己知道！！！bole是数据库的名字
+    #     self.db = pymysql.connect(host='localhost', user='root', passwd='123456', db='info')
+    #     self.cursor = self.db.cursor()
+    #     #由于可能报错所以在这重复拿了一下item中的数据，存在了data的字典中
+    #     data = {
+    #         "timer":item['timer'],
+    #         "value":item['value'],
+    #         "bitValue":item['bitValue'],
+    #         "allValue":item['allValue'],
+    #         "tradeValue":item['tradeValue'],
+    #     }
+    #     #注意：MySQL数据库命令语句
+    #     # insert_sql = "INSERT INTO fxh (name, chName, href,value,globalIndex,value24h,number,change,increase) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+    #     print("00000000000000000")
+    #     print(type(data["timer"]))
+    #     insert_sql = "INSERT INTO eos1 ( timer,value, bitValue,allValue,tradeValue) VALUES (%s,%s,%s,%s,%s)"
+    #     try:
+    #         self.cursor.execute(insert_sql, ( data['timer'],data['value'], data['bitValue'], data['allValue'],data['tradeValue']))
+    #         self.db.commit()
+    #     except Exception as e:
+    #         print('问题数据跳过！.......',e)
+    #         self.db.rollback()
        
-        self.cursor.close()
-        self.db.close()
+    #     self.cursor.close()
+    #     self.db.close()
+    #     return item
+
+    
+    # def __init__(self):
+    #     self.db = None
+    #     self.cursor = None   
+    # def process_item(self, item, spider):
+    #     #数据库的名字和密码自己知道！！！bole是数据库的名字
+    #     self.db = pymysql.connect(host='localhost', user='root', passwd='123456', db='info')
+    #     self.cursor = self.db.cursor()
+    #     #由于可能报错所以在这重复拿了一下item中的数据，存在了data的字典中
+    #     data = {
+    #         "image":item['image'],
+    #         "href":item['href'],
+    #         "name":item['name'],
+    #         "cost":item['cost'],
+    #     }
+    #     #注意：MySQL数据库命令语句
+    #     # insert_sql = "INSERT INTO fxh (name, chName, href,value,globalIndex,value24h,number,change,increase) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+    #     print("00000000000000000")
+    #     insert_sql = "INSERT INTO info ( image,href, name,cost) VALUES (%s,%s,%s,%s)"
+    #     try:
+    #         self.cursor.execute(insert_sql, (data['image'], data['href'], data['name'],data['cost']))
+    #         self.db.commit()
+    #     except Exception as e:
+    #         print('问题数据跳过！.......',e)
+    #         self.db.rollback()
+       
+    #     self.cursor.close()
+    #     self.db.close()
+    #     return item
+
+    def __init__(self, client, db):
+        self.client = pymongo.MongoClient(client)
+        self.db = self.client[db]
+ 
+    # from_crawler()作用就是从settings.py中读取相关配置，然后可以将读取结果保存在类中使用。
+    @classmethod
+    def from_crawler(cls, crawler):
+        # 创建当前类的对象，并传递两个参数。
+        obj = cls(
+            client=crawler.settings.get('MONGOCLIENT', 'localhost'),
+            db=crawler.settings.get('DB', 'test')
+        )
+        return obj
+  
+    def process_item(self, item, spider):
+        #把Item转化成字典方式，然后添加数据
+        self.db['info'].insert_one(dict(item))
         return item
+    # def process_item(self, item, spider):
+    #     self.db['info'].insert_one(dict(item))
+    #     # self.db['info'].update_one({'image': item['image']},{'href': item['href']},{'name': item['name']},{'cost': item['cost']},{'$set': dict(item)}, True)
+    #     return item

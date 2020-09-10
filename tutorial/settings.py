@@ -63,9 +63,12 @@ ROBOTSTXT_OBEY = False
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'tutorial.pipelines.TutorialPipeline': 300,
+    'tutorial.pipelines.TutorialPipeline': 301,
+    # 'NovelSpider.pipelines.MongoPipeline': 301,
 }
 
+MONGOCLIENT = 'localhost'
+DB = 'info'
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
 #AUTOTHROTTLE_ENABLED = True

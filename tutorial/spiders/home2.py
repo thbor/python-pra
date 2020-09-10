@@ -7,7 +7,7 @@ import os
 from scrapy.selector import Selector
 from scrapy.http import Request
 sys.path.append('..')
-from tutorial.items import TutorialItem
+from tutorial.HaitaoItems import HaitaoItem
 from scrapy import cmdline
 #循環1到4頁數據
 class Home2(scrapy.Spider):
@@ -18,7 +18,7 @@ class Home2(scrapy.Spider):
     def parse(self, response):
       items = []
       for ul in response.css('div.swiper-slide'):
-        item = TutorialItem()
+        item = HaitaoItem()
         item['image'] = ul.xpath('a/img/@src').get(),
         item['href'] = ul.xpath('a/@href').get(),
         item['name'] = ul.xpath('a[@class="gs-name text-over-two font14"]/text()').get(),
@@ -34,7 +34,7 @@ class Home2(scrapy.Spider):
                 # 'cost': quote.css('span.text::text').get(),
             # }
         #怎麼確定下一頁數據存不存在，如果最後一頁不確定呢？？？？
-      for i in range(2, 5):  # 爬取第2，4页的数据
+      for i in range(2, 5): 
         url = "https://www.sephora.cn/hot/?k=%E7%95%85%E9%94%80%E6%A6%9C%E5%8D%95&hasInventory=0&sortField=1&sortMode=desc&currentPage=" + str(i) + "&filters="
         yield Request(url, callback=self.parse)
     
